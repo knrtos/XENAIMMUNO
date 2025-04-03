@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Easily Editable HTML Table Rows or Cells</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background: transparent;
+            color: #054607;
+            font-family: "Comfortaa", sans-serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 10px;
+            font-size: 20px;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        th, td {
+            border: 5px solid #498202;
+            padding: 20px;
+            text-align: left;
+            color: #054607;
+            background: rgba(254, 255, 234);
+            border-radius: 5px;
+        }
+
+        th {
+            background-color: #82A436;
+            color: white;
+            font-weight: bold;
+        }
+
+        td:hover {
+            background-color: #447804;
+            color: white;
+            cursor: pointer;
+        }
+
+        .bg-warning {
+            background-color: #498202;
+            color: white;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+    <script type="text/javascript">
+    $(document).ready(function() {
+        var defaultXenaData = [ 
+            {immunization:"BCG", date:"01/22/2020"}, 
+            {immunization:"Hepatitis B", date:"01/22/2020"},
+            {immunization:"Pentavalent vaccine (Diphtheria, Pertussis, Tetanus, Haemophilus Influenzae type b)", date:"03/15/2020"},
+            {immunization:"Polio", date:"03/15/2020"},
+            {immunization:"PCV (Pneumonia and Meningitis)", date:"03/15/2020"},
+            {immunization:"MMR (Measles, Mumps and Rubella)", date:"03/15/2020"},
+            {immunization:"COVID Vaccine (Include type of vaccine)", date:"12/20/2023"},
+            {immunization:"Others", date:"--"}
+        ];
+
+        var storedXenaData = JSON.parse(localStorage.getItem('sennaImmunizationData')) || defaultXenaData;
+
+        var randomSennaId = function() {
+            return Math.random().toString(36).substr(2, 9);
+        };
+
+        var tbl = '<table class="table table-hover">';
+        tbl += '<thead><tr><th>IMMUNIZATION</th><th>DATE</th></tr></thead>';
+        tbl += '<tbody>';
+        $.each(storedXenaData, function(index, val) {
+            var row_senna_id = randomSennaId();
+            tbl += `<tr row_senna_id="${row_senna_id}">
+                        <td><div class="row_xena_data" edit_type="click" col_name="immunization" contenteditable="false">${val.immunization}</div></td>
+                        <td><div class="row_xena_data" edit_type="click" col_name="date" contenteditable="false">${val.date}</div></td>
+                    </tr>`;
+        });
+        tbl += '</tbody></table>';
+        
+        $('.tbl_user_data').html(tbl);
+
+        $(document).on('click', '.row_xena_data', function(event) {
+            event.preventDefault(); 
+            if ($(this).attr('edit_type') == 'button') return false;
+            $(this).attr('contenteditable', 'true').addClass('bg-warning').focus();
+        });
+
+        $(document).on('focusout', '.row_xena_data', function(event) {
+            event.preventDefault();
+            if ($(this).attr('edit_type') == 'button') return false;
+
+            var row_senna_id = $(this).closest('tr').attr('row_senna_id'); 
+            var col_name = $(this).attr('col_name'); 
+            var col_val = $(this).text();
+
+            var index = $(this).closest('tr').index();
+            storedXenaData[index][col_name] = col_val;
+
+            localStorage.setItem('sennaImmunizationData', JSON.stringify(storedXenaData));
+            $(this).removeClass('bg-warning').attr('contenteditable', 'false');
+        });    
+    });
+    </script>
+
+</head>
+<body>
+    <div class="tbl_user_data"></div>
+</body>
+</html>
